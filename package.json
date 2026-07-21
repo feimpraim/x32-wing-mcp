@@ -1,0 +1,30 @@
+{
+  "name": "x32-wing-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for controlling Behringer X32, M32, and WING consoles via OSC — built for Claude and other MCP-compatible AI assistants.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "x32-wing-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector node dist/index.js"
+  },
+  "keywords": ["mcp", "x32", "m32", "wing", "behringer", "osc", "audio", "livesound", "claude"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "osc": "^2.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "@types/node": "^20.14.10"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
