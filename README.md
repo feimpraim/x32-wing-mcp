@@ -1,6 +1,7 @@
 # x32-wing-mcp
 
 [![CI](https://github.com/feimpraim/x32-wing-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/feimpraim/x32-wing-mcp/actions/workflows/ci.yml)
+[![Dependabot](https://img.shields.io/badge/Dependabot-enabled-025E8C?logo=dependabot&logoColor=white)](https://github.com/feimpraim/x32-wing-mcp/network/updates)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 
