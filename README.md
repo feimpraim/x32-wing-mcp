@@ -1,5 +1,9 @@
 # x32-wing-mcp
 
+[![CI](https://github.com/feimpraim/x32-wing-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/feimpraim/x32-wing-mcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+
 An open-source [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that lets Claude (or any MCP-compatible AI assistant) directly control a **Behringer X32 / M32 / WING** digital mixing console over the network, using the consoles' native OSC protocol.
 
 Instead of only analyzing exported scene files after the fact, this lets an AI assistant read live parameters and make real-time adjustments — fader levels, mutes, gate settings, bus sends, scene recall, and more — directly on the console.
@@ -29,7 +33,7 @@ Instead of only analyzing exported scene files after the fact, this lets an AI a
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/x32-wing-mcp.git
+git clone https://github.com/feimpraim/x32-wing-mcp.git
 cd x32-wing-mcp
 ```
 
@@ -164,6 +168,8 @@ This server sends live commands to audio hardware. Please:
 ## Contributing
 
 Issues and PRs welcome — especially from anyone who can verify the WING OSC namespace against real hardware. Please test any new `set_*` tool against a non-critical channel before submitting.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, safety expectations, and the PR process. All participants are expected to follow our [Code of Conduct](CODE_OF_CONDUCT.md). Security or safety concerns should go through [SECURITY.md](SECURITY.md), not public issues.
 
 ## License
 

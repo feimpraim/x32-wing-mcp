@@ -1,0 +1,53 @@
+name: Bug report
+description: Report incorrect behavior, a wrong OSC address, or a crash
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! If this involves a security issue or something that could disrupt live audio, please read [SECURITY.md](../blob/main/SECURITY.md) first.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what actually happened?
+      placeholder: "I called x32_set_channel_fader on ch 1 to -10 dB, but the fader moved to about -6 dB."
+    validations:
+      required: true
+  - type: dropdown
+    id: console
+    attributes:
+      label: Console model
+      options:
+        - X32
+        - M32
+        - WING
+        - "Not applicable / no hardware"
+    validations:
+      required: true
+  - type: input
+    id: console-firmware
+    attributes:
+      label: Console firmware version
+      placeholder: "e.g. X32 4.06"
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node -v`
+      placeholder: "v20.14.0"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The tool call(s), env vars used, and any Inspector output or logs.
+      render: shell
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Confirmation
+      options:
+        - label: I tested against a non-critical channel, not a live show, where applicable.
+          required: false

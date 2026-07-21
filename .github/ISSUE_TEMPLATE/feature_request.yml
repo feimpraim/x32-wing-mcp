@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest a new tool, parameter, or capability
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the mixing/automation workflow you're trying to enable.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed tool or capability
+      description: What tool(s) would you add, and roughly what OSC address(es) would they touch?
+      placeholder: "x32_set_eq_band — set gain/freq/Q for a channel EQ band via /ch/NN/eq/B/..."
+  - type: dropdown
+    id: console
+    attributes:
+      label: Which console(s)?
+      multiple: true
+      options:
+        - X32
+        - M32
+        - WING
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to help implement this.
+          required: false
+        - label: I have hardware I can verify it against.
+          required: false

@@ -1,0 +1,48 @@
+name: WING address verification
+description: Report a verified (or corrected) WING OSC address against real hardware
+labels: ["wing", "verification"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Verifying WING OSC addresses against real hardware is the most valuable contribution to this project. Thank you!
+        See [WING status](../blob/main/README.md#wing-status) for context.
+  - type: input
+    id: tool
+    attributes:
+      label: Which tool / template?
+      description: The `wing_*` tool or the `ADDRESS_TEMPLATES` key in src/wing-tools.ts
+      placeholder: "wing_set_channel_fader"
+    validations:
+      required: true
+  - type: input
+    id: address
+    attributes:
+      label: Verified OSC address
+      placeholder: "/ch/1/fdr"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - "Confirmed correct as-is"
+        - "Corrected (current address is wrong)"
+        - "Address does not exist / different mechanism"
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: WING firmware version
+      placeholder: "e.g. 3.1.2"
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: How did you verify?
+      description: Value type/range observed, what changed on the console, source doc if any.
+    validations:
+      required: true
