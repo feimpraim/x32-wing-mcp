@@ -8,6 +8,11 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: development
+        # Keep the TypeScript compiler out of the group so major/breaking
+        # compiler bumps (e.g. 5.x -> 7.x) arrive as their own reviewable PR,
+        # separate from routine type-definition updates like @types/node.
+        exclude-patterns:
+          - "typescript"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
