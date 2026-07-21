@@ -5,6 +5,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      # TypeScript 7.x is the native (Go) compiler rewrite and breaks this
+      # build; hold on the 5.x line until the migration is done deliberately.
+      # Patch/minor 5.x updates still come through.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: development
