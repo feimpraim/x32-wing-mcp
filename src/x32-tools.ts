@@ -1,8 +1,10 @@
+import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import { ConsoleOSC, pad2 } from "./osc-client.js";
 import { dbToFloat, floatToDb } from "./fader-taper.js";
 import { readScene, X32_ADDRESS_MAP } from "./scene.js";
 import { analyzeScene, formatReport } from "./scene-analysis.js";
+import { parseX32SceneFile } from "./scene-file.js";
 
 /**
  * Registers X32/M32 tools on an McpServer instance.
@@ -196,6 +198,31 @@ export function registerX32Tools(server: any, osc: ConsoleOSC) {
     {},
     async () => {
       const scene = await readScene(osc, X32_ADDRESS_MAP, "X32/M32");
+      const report = analyzeScene(scene);
+      return { content: [{ type: "text", text: formatReport(report) }] };
+    }
+  );
+
+  // ---- Offline scene-file analysis (no console needed) ----------------
+
+  server.tool(
+    "x32_read_scene_file",
+    "Parse a saved X32/M32 scene file (.scn) into the same structured JSON as x32_read_scene, without needing a console connected. Provide an absolute file path. Useful for reviewing or comparing saved scenes offline.",
+    { path: z.string().describe("Absolute path to a .scn scene file.") },
+    async ({ path }: { path: string }) => {
+      const text = await readFile(path, "utf8");
+      const scene = parseX32SceneFile(text);
+      return { content: [{ type: "text", text: JSON.stringify(scene, null, 2) }] };
+    }
+  );
+
+  server.tool(
+    "x32_analyze_scene_file",
+    "Parse a saved X32/M32 scene file (.scn) and evaluate it against live-sound best practices, returning the same prioritized findings and recommendations as x32_analyze_scene — but offline, from a file, with no console connected. Provide an absolute file path.",
+    { path: z.string().describe("Absolute path to a .scn scene file.") },
+    async ({ path }: { path: string }) => {
+      const text = await readFile(path, "utf8");
+      const scene = parseX32SceneFile(text);
       const report = analyzeScene(scene);
       return { content: [{ type: "text", text: formatReport(report) }] };
     }

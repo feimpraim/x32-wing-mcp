@@ -71,19 +71,22 @@ const UNDERGAINED_FADER_DB = 6;
 // At/below this an unmuted channel is effectively silent.
 const SILENT_FADER_DB = -60;
 
+// Distinctive stems (kick, snare, guitar…) match anywhere so run-together labels
+// like "KickOut", "SnareT", "KeysLeft" are caught; short/ambiguous abbreviations
+// (bd, sn, hh, oh, bv, mc) keep word boundaries to avoid false positives.
 const NAME_PATTERNS: [SourceType, RegExp][] = [
-  ["kick", /\b(kick|kik|bd|bass\s?drum)\b/i],
-  ["snare", /\b(snare|snr|sn)\b/i],
-  ["tom", /\b(tom|rack\s?tom|floor\s?tom)\b/i],
-  ["hat", /\b(hh|hi.?hat|hat)\b/i],
-  ["overhead", /\b(oh|o\.?h|overhead|cym|cymbal)\b/i],
-  ["bass", /\b(bass|bass\s?gtr|bass\s?di)\b/i],
-  ["agtr", /\b(aco|acou|acoustic|a\.?gtr)\b/i],
-  ["egtr", /\b(gtr|guitar|elec\s?gtr|e\.?gtr)\b/i],
-  ["piano", /\b(piano|pno|grand)\b/i],
-  ["keys", /\b(key|keys|synth|pad|organ|rhodes|nord)\b/i],
-  ["speech", /\b(spk|speak|speech|lav|lectern|pulpit|pastor|host|mc|announce|podium|preach)\b/i],
-  ["vocal", /\b(vox|vocal|voc|lead|bgv|bv|choir|sing|harm)\b/i],
+  ["kick", /kick|kik|bass\s?drum|\bbd\b/i],
+  ["snare", /snare|\bsnr\b|\bsn\b/i],
+  ["tom", /\btom|rack\s?tom|floor\s?tom/i],
+  ["hat", /hi.?hat|\bhats?\b|\bhh\b/i],
+  ["overhead", /overhead|\boh\b|\bo\.?h\.?\b|cymbal|\bcym\b/i],
+  ["bass", /\bbass\b|bass\s?gtr|bass\s?di/i],
+  ["agtr", /acoustic|\baco\b|\bacou\b|a\.?gtr/i],
+  ["egtr", /guitar|\bgtr\b|elec\s?gtr|e\.?gtr/i],
+  ["piano", /piano|\bpno\b|grand/i],
+  ["keys", /keys?|synth|\bpad\b|organ|rhodes|nord/i],
+  ["speech", /speech|\bspk\b|speak|\blav\b|lectern|pulpit|pastor|\bmc\b|announce|podium|preach|\bhost\b/i],
+  ["vocal", /\bvox\b|vocal|\bvoc\b|\blead\b|\bbgv\b|\bbv\b|choir|\bsing\b|\bharm\b/i],
 ];
 
 export function inferSourceType(name: string): SourceType {

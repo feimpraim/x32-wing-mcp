@@ -18,6 +18,7 @@ Instead of only analyzing exported scene files after the fact, this lets an AI a
 - **X32 / M32**: fader control, mute, bus sends, gate sidechain filter, scene recall, DCA control
 - **Read the whole scene**: dump the entire console state (channels, buses, DCAs, main — names, levels, mutes, HPF/gate/comp/EQ status) as structured JSON
 - **Best-practice analysis**: evaluate the live scene against live-sound standards (gain staging, high-pass filtering, dynamics, gating, labeling, DCA grouping) and get prioritized, advisory recommendations — see [Scene analysis](#scene-analysis)
+- **Offline scene-file analysis**: run the same analysis on a saved `.scn` file with no console attached — review or vet a scene from your laptop
 - **WING**: scaffolded tool set with the same shape as X32 (addresses flagged `[UNVERIFIED]` — see [WING status](#wing-status) below)
 - Shared UDP OSC transport with automatic `/xremote` keep-alive
 - Built on the official `@modelcontextprotocol/sdk`
@@ -136,6 +137,8 @@ All configuration is via environment variables:
 | `x32_set_dca_fader` | Set a DCA group's fader level |
 | `x32_read_scene` | **(read-only)** Dump the whole console state as structured JSON |
 | `x32_analyze_scene` | **(read-only)** Analyze the live scene against best practices and return recommendations |
+| `x32_read_scene_file` | **(offline)** Parse a saved `.scn` file into structured JSON — no console needed |
+| `x32_analyze_scene_file` | **(offline)** Analyze a saved `.scn` file against best practices — no console needed |
 
 **Note on Main LR routing**: bus-to-Main-LR assignment is controlled by the bus's `/grp` bitmask field, not a simple on/off OSC message, and getting this wrong can silently break the routing path for everything feeding that bus (this project's development history includes exactly that failure mode on a live scene). The `x32_set_bus_to_main_lr` tool currently reports on this rather than writing it — contributions that implement a verified, safe version are welcome.
 
@@ -164,6 +167,12 @@ The tool also returns a per-channel "recommended starting points" template you c
 use as a checklist. Because the higher intelligence lives in the MCP client, you
 can also just ask your assistant things like *"read the scene and suggest how to
 improve the vocal mix"* — it will call `x32_read_scene` and reason over the JSON.
+
+**Offline, from a file:** `x32_analyze_scene_file` runs the exact same analysis on
+a saved `.scn` scene file (pass an absolute path), so you can vet a scene from your
+laptop with no console on the network. The `.scn` parser ([`src/scene-file.ts`](src/scene-file.ts))
+was validated against a real X32 4.0 scene file, which also confirmed the live-OSC
+address map used by `x32_read_scene`.
 
 > These are best-practice starting points, not absolutes. Always verify against
 > the room, the source, and the program material before changing a live console.
@@ -200,10 +209,11 @@ This server sends live commands to audio hardware. Please:
 ## Roadmap / ideas
 
 - [x] Full-scene read + best-practice analysis (`x32_read_scene` / `x32_analyze_scene`)
+- [x] Offline `.scn` scene-file parsing + analysis (`x32_read_scene_file` / `x32_analyze_scene_file`)
 - [ ] Verified WING OSC address set (incl. `WING_ADDRESS_MAP` for scene reads)
 - [ ] EQ band get/set tools (currently only gate filter is implemented)
 - [ ] Compressor threshold/ratio tools
-- [ ] Scene/snapshot diff tool (compare live console state against a saved `.scn`/`.snap` file)
+- [ ] Scene/snapshot diff tool (compare live console state against a saved `.scn` file — the parser now makes this straightforward)
 - [ ] Deeper analysis: per-source EQ suggestions, phantom-power sanity checks (needs head-amp→channel mapping)
 - [ ] Read-only "safe mode" flag
 - [ ] Meter/level streaming resource (MCP resources, not just tools)

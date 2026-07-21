@@ -16,8 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   high-pass filtering, dynamics, gating, labeling, DCA grouping, main output) and
   return prioritized, advisory findings plus per-channel recommended starting
   points. Read-only; never changes the console.
+- **Offline scene-file analysis**: `x32_read_scene_file` / `x32_analyze_scene_file`
+  parse a saved X32 `.scn` file and run the same analysis with no console attached.
+  The parser (`src/scene-file.ts`) was validated against a real X32 4.0 scene file,
+  which also confirmed the live-OSC address map.
 - `ConsoleOSC.querySafe()` — timeout-tolerant query used by the scene reader.
-- Test suite (`npm test`, Node's built-in runner) covering the analysis engine.
+- Test suite (`npm test`, Node's built-in runner) covering the analysis engine and
+  the scene-file parser.
+
+### Fixed
+- Source-type inference now recognizes run-together channel labels (e.g. "KickOut",
+  "SnareT", "KeysLeft", "HATS"), which previously fell through to "unknown".
 - Community health files: contributing guide, code of conduct, security policy,
   issue templates (bug / feature / WING verification), and PR template.
 - CI workflow building and testing against Node 18, 20, and 22.

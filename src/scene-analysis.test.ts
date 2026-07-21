@@ -44,6 +44,21 @@ test("inferSourceType maps common names", () => {
   assert.equal(inferSourceType(""), "unknown");
 });
 
+test("inferSourceType handles run-together labels", () => {
+  // Real X32 labels frequently concatenate words with no separator.
+  assert.equal(inferSourceType("KickOut"), "kick");
+  assert.equal(inferSourceType("KickIn"), "kick");
+  assert.equal(inferSourceType("SnareT"), "snare");
+  assert.equal(inferSourceType("SnareB"), "snare");
+  assert.equal(inferSourceType("HATS"), "hat");
+  assert.equal(inferSourceType("KeysLeft"), "keys");
+  assert.equal(inferSourceType("KeysRight"), "keys");
+  assert.equal(inferSourceType("Floor Tom"), "tom");
+  assert.equal(inferSourceType("OH Left"), "overhead");
+  assert.equal(inferSourceType("Clean GTR"), "egtr");
+  assert.equal(inferSourceType("Bass DI"), "bass");
+});
+
 test("flags an under-gained (high fader) active channel", () => {
   const r = analyzeScene(scene([ch(1, { name: "Lead Vox", faderDb: 8 })]));
   const f = r.findings.find((x) => x.standard === "Gain staging");
