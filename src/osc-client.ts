@@ -74,6 +74,19 @@ export class ConsoleOSC {
   }
 
   /**
+   * Like query(), but resolves to `undefined` instead of rejecting when the
+   * console doesn't answer within timeoutMs. Used by the scene reader so a
+   * single missing/unsupported parameter never aborts a full-console dump.
+   */
+  async querySafe(address: string, timeoutMs = 600): Promise<any[] | undefined> {
+    try {
+      return await this.query(address, timeoutMs);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
    * Keeps a live subscription alive so the console streams back state
    * changes. Required by the X32/M32; harmless to call for WING too.
    * Renews every 8s (consoles typically time out subscriptions at 10s).

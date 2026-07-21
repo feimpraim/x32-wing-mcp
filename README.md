@@ -16,6 +16,8 @@ Instead of only analyzing exported scene files after the fact, this lets an AI a
 ## Features
 
 - **X32 / M32**: fader control, mute, bus sends, gate sidechain filter, scene recall, DCA control
+- **Read the whole scene**: dump the entire console state (channels, buses, DCAs, main — names, levels, mutes, HPF/gate/comp/EQ status) as structured JSON
+- **Best-practice analysis**: evaluate the live scene against live-sound standards (gain staging, high-pass filtering, dynamics, gating, labeling, DCA grouping) and get prioritized, advisory recommendations — see [Scene analysis](#scene-analysis)
 - **WING**: scaffolded tool set with the same shape as X32 (addresses flagged `[UNVERIFIED]` — see [WING status](#wing-status) below)
 - Shared UDP OSC transport with automatic `/xremote` keep-alive
 - Built on the official `@modelcontextprotocol/sdk`
@@ -132,16 +134,54 @@ All configuration is via environment variables:
 | `x32_load_scene` | Recall a scene by number |
 | `x32_set_dca_mute` | Mute/unmute a DCA group |
 | `x32_set_dca_fader` | Set a DCA group's fader level |
+| `x32_read_scene` | **(read-only)** Dump the whole console state as structured JSON |
+| `x32_analyze_scene` | **(read-only)** Analyze the live scene against best practices and return recommendations |
 
 **Note on Main LR routing**: bus-to-Main-LR assignment is controlled by the bus's `/grp` bitmask field, not a simple on/off OSC message, and getting this wrong can silently break the routing path for everything feeding that bus (this project's development history includes exactly that failure mode on a live scene). The `x32_set_bus_to_main_lr` tool currently reports on this rather than writing it — contributions that implement a verified, safe version are welcome.
+
+## Scene analysis
+
+`x32_analyze_scene` reads the entire console and checks it against the things an
+experienced engineer looks at when they inherit a desk. It is **read-only and
+advisory** — it never sends a change to the console, so it's safe to run during a
+live show. The heuristics live in [`src/scene-analysis.ts`](src/scene-analysis.ts)
+and are covered by tests (`npm test`), so they run consistently without hardware.
+
+What it checks:
+
+- **Gain staging** — flags active channels whose fader is parked well above unity (a sign the channel is under-gained at the head amp)
+- **High-pass filtering** — suggests a low-cut on vocal/speech/instrument sources that have it disabled
+- **Dynamics** — suggests gentle compression on sources that typically need it (vocals, bass, acoustic)
+- **Gating** — suggests gating close-mic'd drums to control bleed
+- **Housekeeping** — finds unmuted-but-silent channels and unnamed active channels
+- **Labeling** — flags duplicate channel names
+- **Control grouping** — suggests setting up DCAs when many channels are active but none are grouped
+- **Main output** — warns if Main LR is muted or very low while channels are active
+
+Source-specific advice (which HPF frequency, what compression) is inferred from
+**channel names**, so the more your channels are labeled, the better the guidance.
+The tool also returns a per-channel "recommended starting points" template you can
+use as a checklist. Because the higher intelligence lives in the MCP client, you
+can also just ask your assistant things like *"read the scene and suggest how to
+improve the vocal mix"* — it will call `x32_read_scene` and reason over the JSON.
+
+> These are best-practice starting points, not absolutes. Always verify against
+> the room, the source, and the program material before changing a live console.
 
 ## WING status
 
 The WING tool set (`wing_*`) is scaffolded with the same shape as the X32 tools but the OSC addresses are **unverified** — the WING's namespace has real differences from X32 (more buses/matrices, JSON-based `.snap` format). Every WING tool is labeled `[UNVERIFIED]` in its description.
 
+The scene tools have WING variants too — `wing_read_scene` and `wing_analyze_scene` —
+but they reuse the X32-shaped address map (`WING_ADDRESS_MAP` in
+[`src/scene.ts`](src/scene.ts)) as a scaffold, so their output is unverified.
+Note the WING fader taper differs from the X32, so reported dB values will be off
+until the WING mapping is confirmed. The analysis engine itself is console-agnostic —
+once the WING addresses are verified, `wing_analyze_scene` gets accurate for free.
+
 To help finish this:
 1. Get Behringer's official WING OSC protocol reference document
-2. Verify/correct the address templates in `src/wing-tools.ts` (`ADDRESS_TEMPLATES` object — all addresses are centralized there)
+2. Verify/correct the address templates in `src/wing-tools.ts` (`ADDRESS_TEMPLATES` object) and the read addresses in `WING_ADDRESS_MAP` (`src/scene.ts`)
 3. Remove the `[UNVERIFIED]` labels once confirmed against a real console
 4. Open a PR
 
@@ -159,10 +199,12 @@ This server sends live commands to audio hardware. Please:
 
 ## Roadmap / ideas
 
-- [ ] Verified WING OSC address set
+- [x] Full-scene read + best-practice analysis (`x32_read_scene` / `x32_analyze_scene`)
+- [ ] Verified WING OSC address set (incl. `WING_ADDRESS_MAP` for scene reads)
 - [ ] EQ band get/set tools (currently only gate filter is implemented)
 - [ ] Compressor threshold/ratio tools
 - [ ] Scene/snapshot diff tool (compare live console state against a saved `.scn`/`.snap` file)
+- [ ] Deeper analysis: per-source EQ suggestions, phantom-power sanity checks (needs head-amp→channel mapping)
 - [ ] Read-only "safe mode" flag
 - [ ] Meter/level streaming resource (MCP resources, not just tools)
 

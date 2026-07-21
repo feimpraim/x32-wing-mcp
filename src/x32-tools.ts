@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { ConsoleOSC, pad2 } from "./osc-client.js";
 import { dbToFloat, floatToDb } from "./fader-taper.js";
+import { readScene, X32_ADDRESS_MAP } from "./scene.js";
+import { analyzeScene, formatReport } from "./scene-analysis.js";
 
 /**
  * Registers X32/M32 tools on an McpServer instance.
@@ -169,6 +171,33 @@ export function registerX32Tools(server: any, osc: ConsoleOSC) {
     async ({ dca, db }: { dca: number; db: number }) => {
       osc.send(`/dca/${dca}/fader`, [{ type: "f", value: dbToFloat(db) }]);
       return { content: [{ type: "text", text: `DCA${dca} fader set to ~${db}dB` }] };
+    }
+  );
+
+  // ---- Scene read + analysis (read-only) ------------------------------
+
+  server.tool(
+    "x32_read_scene",
+    "Read the entire current console state (channels, buses, DCAs, main: names, fader dB, mutes, HPF/gate/comp/EQ status) and return it as structured JSON. Read-only — sends no changes to the console. Use this to inspect the live scene or as input for analysis.",
+    {
+      channels: z.number().int().min(1).max(32).optional().describe("How many input channels to read (default 32)."),
+      buses: z.number().int().min(0).max(16).optional().describe("How many mix buses to read (default 16)."),
+      dcas: z.number().int().min(0).max(8).optional().describe("How many DCA groups to read (default 8)."),
+    },
+    async (args: { channels?: number; buses?: number; dcas?: number }) => {
+      const scene = await readScene(osc, X32_ADDRESS_MAP, "X32/M32", args);
+      return { content: [{ type: "text", text: JSON.stringify(scene, null, 2) }] };
+    }
+  );
+
+  server.tool(
+    "x32_analyze_scene",
+    "Read the entire console state and evaluate it against live-sound best practices (gain staging, high-pass filtering, dynamics, gating, labeling, DCA grouping, main output), returning prioritized findings plus recommended per-channel starting points. Read-only and advisory — it never changes the console. Best results when channels are named, since source-specific advice is inferred from channel names.",
+    {},
+    async () => {
+      const scene = await readScene(osc, X32_ADDRESS_MAP, "X32/M32");
+      const report = analyzeScene(scene);
+      return { content: [{ type: "text", text: formatReport(report) }] };
     }
   );
 }

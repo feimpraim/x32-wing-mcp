@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { ConsoleOSC, pad2 } from "./osc-client.js";
 import { dbToFloat, floatToDb } from "./fader-taper.js";
+import { readScene, WING_ADDRESS_MAP } from "./scene.js";
+import { analyzeScene, formatReport } from "./scene-analysis.js";
 
 /**
  * MCP tool definitions for the Behringer WING.
@@ -90,6 +92,33 @@ export function registerWingTools(server: any, osc: ConsoleOSC) {
     async ({ snapshotNumber }: { snapshotNumber: number }) => {
       osc.send(ADDRESS_TEMPLATES.snapshotLoad(snapshotNumber), [{ type: "i", value: snapshotNumber }]);
       return { content: [{ type: "text", text: `[unverified] Attempted snapshot load: ${snapshotNumber}` }] };
+    }
+  );
+
+  // ---- Scene read + analysis (read-only, UNVERIFIED addresses) --------
+
+  server.tool(
+    "wing_read_scene",
+    "[UNVERIFIED ADDRESSES] Read the current WING state (channels, buses, DCAs, main) into structured JSON. Read-only. The WING OSC namespace and fader taper differ from the X32; this reuses X32-shaped addresses as a scaffold, so values (especially fader dB) may be wrong until verified against a real WING. Expect a partial read.",
+    {
+      channels: z.number().int().min(1).max(48).optional(),
+      buses: z.number().int().min(0).max(16).optional(),
+      dcas: z.number().int().min(0).max(8).optional(),
+    },
+    async (args: { channels?: number; buses?: number; dcas?: number }) => {
+      const scene = await readScene(osc, WING_ADDRESS_MAP, "WING [UNVERIFIED]", args);
+      return { content: [{ type: "text", text: JSON.stringify(scene, null, 2) }] };
+    }
+  );
+
+  server.tool(
+    "wing_analyze_scene",
+    "[UNVERIFIED ADDRESSES] Read the WING state and evaluate it against live-sound best practices, returning prioritized findings and recommended per-channel starting points. Read-only and advisory. The underlying read uses unverified WING addresses, so treat findings as indicative until the WING namespace is confirmed.",
+    {},
+    async () => {
+      const scene = await readScene(osc, WING_ADDRESS_MAP, "WING [UNVERIFIED]");
+      const report = analyzeScene(scene);
+      return { content: [{ type: "text", text: formatReport(report) }] };
     }
   );
 }
