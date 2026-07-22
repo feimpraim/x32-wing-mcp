@@ -32,7 +32,12 @@ export class ConsoleOSC {
       const pending = this.pending.get(msg.address);
       if (pending) {
         clearTimeout(pending.timer);
-        pending.resolve(msg.args ?? []);
+        // With metadata:true, each arg arrives as { type, value } rather than
+        // a raw value — unwrap here so callers always get plain values.
+        const rawArgs = (msg.args ?? []).map((a: any) =>
+          a && typeof a === "object" && "value" in a ? a.value : a
+        );
+        pending.resolve(rawArgs);
         this.pending.delete(msg.address);
       }
     });
