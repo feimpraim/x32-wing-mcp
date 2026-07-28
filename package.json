@@ -17,7 +17,7 @@
   "keywords": ["mcp", "x32", "m32", "wing", "behringer", "osc", "audio", "livesound", "claude"],
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "osc": "^2.4.5",
     "zod": "^4.4.3"
   },
